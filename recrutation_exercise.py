@@ -114,6 +114,13 @@ def _setup_logger(log_path: Path):
     logger.info(f"Logger initialized, logging to {log_path}")
 
 def main():
+    # arguments I am suposed to get 
+    # - path to source folder
+    # - path to replica folder
+    # - interval between synchronizations
+    # - amount of synchronizations
+    # - path to log file
+
     # parsing command line arguments
     parser = argparse.ArgumentParser(
         description="Read synchronization parameters: source, replica, interval, amount, log path"
