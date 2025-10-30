@@ -8,7 +8,7 @@ import time
 
 # create global logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO) # Set to INFO or DEBUG as needed
+logger.setLevel(logging.INFO)
 
 # set formatting
 logger_formatter = logging.Formatter('%(asctime)s %(name)s [%(levelname)s]: %(message)s')
@@ -94,7 +94,7 @@ def _sync_folders(source: Path, replica: Path, logger: logging.Logger):
                 except Exception as e:
                     logger.exception(f"Failed to remove directory {rep_dir}: {e}")
 
-def run_periodic_sync(source: Path, replica: Path, interval: float, amount: int, logger: logging.Logger):
+def run_periodic_sync(source: Path, replica: Path, interval: float, amount: int):
     logger.info(f"Starting periodic sync from {source} to {replica} every {interval} seconds, {amount} times.")
 
     for i in range(amount):
@@ -114,14 +114,6 @@ def _setup_logger(log_path: Path):
     logger.info(f"Logger initialized, logging to {log_path}")
 
 def main():
-    # arguments I am suposed to get 
-    # - path to source folder
-    # - path to replica folder
-    # - interval between synchronizations
-    # - amount of synchronizations
-    # - path to log file
-
-
     # parsing command line arguments
     parser = argparse.ArgumentParser(
         description="Read synchronization parameters: source, replica, interval, amount, log path"
@@ -139,7 +131,7 @@ def main():
         parser.error(f"log file directory does not exist: {args.log.parent}")
     
     # logger setup
-    logger = _setup_logger(args.log)
+    _setup_logger(args.log)
 
     # basic validation
     if not args.source.exists() or not args.source.is_dir():
@@ -162,9 +154,7 @@ def main():
         source=args.source,
         replica=args.replica,
         interval=args.interval,
-        amount=args.amount,
-        log_path=args.log,
-        logger=logger
+        amount=args.amount
     )
 
 
