@@ -1,9 +1,17 @@
 import argparse
+import hashlib
 import os
 from pathlib import Path
 import logging
 import shutil
 import time
+
+def _get_file_hash(file_path: Path) -> str:
+    hasher = hashlib.sha256()
+    with file_path.open("rb") as f:
+        while chunk := f.read(8192):
+            hasher.update(chunk)
+    return hasher.hexdigest()
 
 def _needs_copy(src: Path, rep: Path) -> bool:
     if not rep.exists():
@@ -13,8 +21,9 @@ def _needs_copy(src: Path, rep: Path) -> bool:
         rep_stat = rep.stat()
         if src_stat.st_size != rep_stat.st_size:
             return True
+        # checking modification time and comparing hashes if they differ
         if int(src_stat.st_mtime) != int(rep_stat.st_mtime):
-            return True
+            return _get_file_hash(src) != _get_file_hash(rep)
         return False
     except Exception:
         return True
@@ -22,7 +31,7 @@ def _needs_copy(src: Path, rep: Path) -> bool:
 def _sync_folders(source: Path, replica: Path, logger: logging.Logger):
     logger.info(f"Syncing from {source} to {replica}")
 
-    #adding and updating files from source to replica
+    # adding and updating files from source to replica
     for root, dirs, files in os.walk(source):
         src_root = Path(root)
         rel = src_root.relative_to(source)
