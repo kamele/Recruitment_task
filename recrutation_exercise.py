@@ -6,6 +6,19 @@ import logging
 import shutil
 import time
 
+# create global logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO) # Set to INFO or DEBUG as needed
+
+# set formatting
+logger_formatter = logging.Formatter('%(asctime)s %(name)s [%(levelname)s]: %(message)s')
+
+# create console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logger_formatter)
+logger.addHandler(console_handler)
+
+
 def _get_file_hash(file_path: Path) -> str:
     hasher = hashlib.sha256()
     with file_path.open("rb") as f:
@@ -81,8 +94,8 @@ def _sync_folders(source: Path, replica: Path, logger: logging.Logger):
                 except Exception as e:
                     logger.exception(f"Failed to remove directory {rep_dir}: {e}")
 
-def run_periodic_sync(source: Path, replica: Path, interval: float, amount: int, log_path: Path, logger: logging.Logger):
-    logger.info(f"Starting periodic sync from {source} to {replica} every {interval} seconds, {amount} times. Logs at {log_path}")
+def run_periodic_sync(source: Path, replica: Path, interval: float, amount: int, logger: logging.Logger):
+    logger.info(f"Starting periodic sync from {source} to {replica} every {interval} seconds, {amount} times.")
 
     for i in range(amount):
         logger.info(f"Sync iteration {i+1}/{amount} started.")
@@ -92,25 +105,13 @@ def run_periodic_sync(source: Path, replica: Path, interval: float, amount: int,
             time.sleep(interval)
     logger.info("Periodic sync completed.")
 
-def _setup_logger(log_path: Path) -> logging.Logger:
-    # create logger
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.INFO) # Set to INFO or DEBUG as needed
-
-    # set formatting
-    formatter = logging.Formatter('%(asctime)s %(name)s [%(levelname)s]: %(message)s')
-
+def _setup_logger(log_path: Path):
     # create file handler
     file_handler = logging.FileHandler(log_path)
-    file_handler.setFormatter(formatter)
+    file_handler.setFormatter(logger_formatter)
     logger.addHandler(file_handler)
 
-    # create console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-
-    return logger
+    logger.info(f"Logger initialized, logging to {log_path}")
 
 def main():
     # arguments I am suposed to get 
